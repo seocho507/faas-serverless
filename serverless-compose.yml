@@ -1,0 +1,9 @@
+services:
+  organization:
+    path: ./packages/organization
+
+  group:
+    path: ./packages/group
+
+  user:
+    path: ./packages/user

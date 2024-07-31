@@ -1,0 +1,86 @@
+service: aiotion-serverless-user
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: ap-northeast-2
+  stage: ${opt:stage, 'dev'}
+  apiGateway:
+    restApiId: hkr8ei1i5a
+    restApiRootResourceId: jwpqenrar1
+  environment:
+    NODE_ENV: ${self:provider.stage}
+    DYNAMODB_TABLE: aiotion-${self:provider.stage}
+    JWT_ACCESS_SECRET: test123456789
+    JWT_REFRESH_SECRET: 123456789test
+  deploymentBucket:
+    name: aiotion-serverless-user-deployment-bucket-${self:provider.stage}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:DescribeTable
+            - dynamodb:Query
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - arn:aws:dynamodb:ap-northeast-2:*:table/aiotion-${self:provider.stage}
+functions:
+  createUsers:
+    handler: src/create/handler.createUsers
+    events:
+      - http:
+          path: users
+          method: post
+          cors: true
+  getUserById:
+    handler: src/get/handler.getUserById
+    events:
+      - http:
+          path: users/one
+          method: post
+          cors: true
+  getUserByOrg:
+    handler: src/get/handler.getUserByOrg
+    events:
+      - http:
+          path: users/org
+          method: post
+          cors: true
+  getUserByGroup:
+    handler: src/get/handler.getUserByGroup
+    events:
+      - http:
+          path: users/group
+          method: post
+          cors: true
+  deleteUsers:
+    handler: src/delete/handler.deleteUsers
+    events:
+      - http:
+          path: users
+          method: delete
+          cors: true
+  putUser:
+    handler: src/update/handler.updateUser
+    events:
+      - http:
+          path: users
+          method: put
+          cors: true
+
+plugins:
+  - serverless-offline
+
+build:
+  esbuild:
+    bundle: true
+    minify: false
+    sourcemap:
+      type: linked
+      setNodeOptions: true
+      external:
+        - '@aws-sdk/*'

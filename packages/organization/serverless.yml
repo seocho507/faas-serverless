@@ -1,0 +1,111 @@
+service: aiotion-serverless-organization
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: ap-northeast-2
+  stage: ${opt:stage, 'dev'}
+  apiGateway:
+    restApiId: hkr8ei1i5a
+    restApiRootResourceId: jwpqenrar1
+  environment:
+    NODE_ENV: ${self:provider.stage}
+    DYNAMODB_TABLE: aiotion-${self:provider.stage}
+    JWT_ACCESS_SECRET: test123456789
+    JWT_REFRESH_SECRET: 123456789test
+  deploymentBucket:
+    name: aiotion-serverless-organization-deployment-bucket-${self:provider.stage}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:DescribeTable
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - arn:aws:dynamodb:ap-northeast-2:*:table/aiotion-${self:provider.stage}
+
+functions:
+  createOrganization:
+    handler: src/create/handler.createOrganization
+    events:
+      - http:
+          path: organizations
+          method: post
+          cors: true
+  getAllOrganizations:
+    handler: src/get/handler.getAllOrganizations
+    events:
+      - http:
+          path: organizations/all
+          method: get
+          cors: true
+  deleteOrganization:
+    handler: src/delete/handler.deleteOrganization
+    events:
+      - http:
+          path: organizations
+          method: delete
+          cors: true
+  putOrganization:
+    handler: src/update/handler.putOrganization
+    events:
+      - http:
+          path: organizations
+          method: put
+          cors: true
+  getOrganizationById:
+    handler: src/get/handler.getOrganizationById
+    events:
+      - http:
+          path: organizations/one
+          method: post
+          cors: true
+
+  createAdmin:
+    handler: src/admin/handler.createAdmin
+    events:
+      - http:
+          path: admin
+          method: post
+          cors: true
+  loginAdmin:
+    handler: src/admin/handler.loginAdmin
+    events:
+      - http:
+          path: admin/login
+          method: post
+          cors: true
+  deleteAdmin:
+    handler: src/admin/handler.deleteAdmin
+    events:
+      - http:
+          path: admin
+          method: delete
+          cors: true
+
+  refreshAccessToken:
+    handler: src/admin/handler.refreshAccessToken
+    events:
+      - http:
+          path: admin/refresh/token
+          method: post
+          cors: true
+
+plugins:
+  - serverless-offline
+
+build:
+  esbuild:
+    bundle: true
+    minify: false
+    sourcemap:
+      type: linked
+      setNodeOptions: true
+      external:
+        - '@aws-sdk/*'

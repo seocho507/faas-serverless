@@ -1,0 +1,77 @@
+service: aiotion-serverless-group
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: ap-northeast-2
+  stage: ${opt:stage, 'dev'}
+  apiGateway:
+    restApiId: hkr8ei1i5a
+    restApiRootResourceId: jwpqenrar1
+  environment:
+    NODE_ENV: ${self:provider.stage}
+    DYNAMODB_TABLE: aiotion-${self:provider.stage}
+  deploymentBucket:
+    name: aiotion-serverless-group-deployment-bucket-${self:provider.stage}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:DescribeTable
+            - dynamodb:Query
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - arn:aws:dynamodb:ap-northeast-2:*:table/aiotion-${self:provider.stage}
+functions:
+  createGroups:
+    handler: src/create/handler.createGroups
+    events:
+      - http:
+          path: groups
+          method: post
+          cors: true
+  getGroupById:
+    handler: src/get/handler.getGroupById
+    events:
+      - http:
+          path: groups/one
+          method: post
+          cors: true
+  getGroupByOrgId:
+    handler: src/get/handler.getGroupByOrgId
+    events:
+      - http:
+          path: groups/org
+          method: post
+          cors: true
+  deleteGroups:
+    handler: src/delete/handler.deleteGroups
+    events:
+      - http:
+          path: groups
+          method: delete
+          cors: true
+  putGroup:
+    handler: src/update/handler.putGroup
+    events:
+      - http:
+          path: groups
+          method: put
+          cors: true
+
+plugins:
+  - serverless-offline
+
+build:
+  esbuild:
+    bundle: true
+    minify: false
+    sourcemap:
+      type: linked
+      setNodeOptions: true
+      external:
+        - '@aws-sdk/*'

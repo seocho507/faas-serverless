@@ -1,0 +1,54 @@
+# Node.js 관련 무시 파일
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+
+# 환경 설정 파일
+.env
+.env.local
+.env.*.local
+
+# 빌드 출력
+/dist
+/build
+/out
+/packages/*/dist/
+/packages/*/src/**/*.js
+
+# Serverless 특정
+.serverless/
+.webpack/
+
+# IDE 설정
+.idea/
+*.sublime-workspace
+*.sublime-project
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# OS 관련 파일
+.DS_Store
+Thumbs.db
+
+# 로그 파일
+*.log
+
+# 임시 파일
+*.tmp
+*.temp
+
+# 테스트 관련 파일
+coverage/
+jest.cache/
+.nyc_output/
+cypress/
+mocha.opts
+*.snap
+
+# js 관련 파일 무시
+commons/*/*.js
+commons/*.js
+packages/*/*.js
